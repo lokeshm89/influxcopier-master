@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: influxcopier-deployment
+  labels:
+    app: influxcopier
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: influxcopier
+  template:
+    metadata:
+      labels:
+        app: influxcopier
+    spec:
+      containers:
+        - name: influxcopier
+          image: registry4cbc.azurecr.io/influxcopier:2.0
+          imagePullPolicy: Always
+          env :
+            - name : profile
+              value : prod
+          ports:
+            - containerPort: 80
+
+
