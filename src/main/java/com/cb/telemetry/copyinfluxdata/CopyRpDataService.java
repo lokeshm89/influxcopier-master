@@ -7,12 +7,12 @@ import com.influxdb.query.FluxTable;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.stereotype.Service;
-
 import java.util.*;
 
 @ComponentScan(basePackages = {"com.cb.telemetry.copyinfluxdata"})
@@ -21,7 +21,6 @@ import java.util.*;
 @RequiredArgsConstructor
 public class CopyRpDataService {
     private final RosePointDataRepository rosePointDataRepository;
-    private final ConfigurationMap configurationMap;
     private final DateConfig dateConfig;
     private final EntityAdapter adapter;
 
@@ -38,22 +37,19 @@ public class CopyRpDataService {
 
         List<RosePointData> rosePointDataList = new ArrayList<>();
 
-        DateTime fullStartTime = DateTime.parse(dateConfig.getFullStartTime());
-        log.info(String.valueOf(fullStartTime));
-
-        DateTime desireDate = DateTime.parse(dateConfig.getFullEndTime());
-        log.info(String.valueOf(desireDate));
-        DateTime fullEndTime = desireDate.minusDays(10);
-        //  DateTime fullStartTime = new DateTime(2023, 9, 30, 17, 15, 0, 0, DateTimeZone.UTC);
-        //DateTime fullEndTime = new DateTime(2023, 7, 10, 11, 0, 0, 0, DateTimeZone.UTC);
-
-
+//        DateTime fullStartTime = DateTime.parse(dateConfig.getFullStartTime());
+//        DateTime desireDate = DateTime.parse(dateConfig.getFullEndTime());
+//        DateTime fullEndTime = desireDate.minusDays(10);
+        DateTime fullStartTime = new DateTime(2023, 10, 17, 17, 0, 0, 0, DateTimeZone.UTC);
+        DateTime fullEndTime = new DateTime(2023, 10, 15, 11, 0, 0, 0, DateTimeZone.UTC);
+String assetId = dateConfig.getAssetId();
         String countQuery = "from(bucket: \"rosepoint-data\")\n" +
                 "  |> range(start: " + fmt.print(fullEndTime) + ", stop: " + fmt.print(fullStartTime) + ")" +
-                "  |> filter(fn: (r) => r[\"asset\"] == \"562115\")\n" +
+                "  |> filter(fn: (r) => r[\"asset\"] == \"" + assetId + "\")\n" +
+                "|> filter(fn: (r) => r[\"_measurement\"] == \"position\")" +
                 "  |> count()\n" +
                 "  |> yield(name: \"count\")";
-
+log.info(countQuery);
         Long totalRecords = Long.valueOf(0);
         Long processedRecords = Long.valueOf(0);
         Long skippedRecords = Long.valueOf(0);
@@ -64,7 +60,7 @@ public class CopyRpDataService {
             log.info("Copying " + totalRecords + " data points from source to destination for the asset " + assetCode);
         }
         DateTime startTime = fullStartTime;
-        DateTime endTime = startTime.minus(10);
+        DateTime endTime = startTime.minusHours(6);
         int previousMonth = endTime.getMonthOfYear();
         log.info("Time Period : " + fmt.print(endTime) + "\tto\t" + fmt.print(startTime) + " Total records processed : " + processedRecords);
         while (endTime.isAfter(fullEndTime)) {
@@ -83,13 +79,18 @@ public class CopyRpDataService {
                 }
             }
 
-            if(processedRecords <= totalRecords) {
-    double percentage = ((double) processedRecords / totalRecords) * 100;
-    percentage = Math.round(percentage);
-    log.info("Total records processed=" + processedRecords + "\tPercentage completed=" + percentage);
-} else {
-    break ;
-}
+            double percentage = ((double) processedRecords / totalRecords) * 100;
+            percentage = Math.min(percentage, 100);
+            log.info("Total records processed=" + processedRecords + "\tPercentage completed=" + percentage);
+
+
+//            if(processedRecords <= totalRecords) {
+//                double percentage = ((double) processedRecords / totalRecords) * 100;
+//                percentage = Math.min(percentage, 100);
+//                log.info("Total records processed=" + processedRecords + "\tPercentage completed=" + percentage);
+//            } else {
+//                break;
+//            }
 
             if (!rosePointDataList.isEmpty()) {
                 rosePointDataRepository.saveAll(rosePointDataList);
@@ -104,7 +105,8 @@ public class CopyRpDataService {
                         + " Records skipped  : " + skippedRecords);
                 previousMonth = endTime.getMonthOfYear();
             }
-
         }
+log.info(String.valueOf(processedRecords));
     }
 }
+

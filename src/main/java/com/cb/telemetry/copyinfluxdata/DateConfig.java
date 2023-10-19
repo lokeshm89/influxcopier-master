@@ -8,11 +8,14 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @Getter
 public class DateConfig {
-    @Value("${fullStartTime}")
+    @Value("${bsm.fullStartTime}")
     private String fullStartTime;
 
-    @Value("${fullEndTime}")
+    @Value("${bsm.fullEndTime}")
     private String fullEndTime;
+
+    @Value("${bsm.assetId}")
+    private String assetId;
 public  DateConfig(){
     this.fullStartTime= String.valueOf(DateTime.now());
 }

@@ -34,9 +34,7 @@ public final RosePointDataRepository rosePointDataRepository;
         }
         return data;
     }
-
     public RosePointData getRosePointData(Map<String, Object> values) {
-
         values.remove("result");
         values.remove("table");
         values.remove("_start");

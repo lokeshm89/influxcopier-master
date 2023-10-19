@@ -13,7 +13,7 @@ import org.springframework.context.annotation.PropertySource;
  */
 
 @Configuration
-@PropertySource("classpath:application-dev.properties")
+@PropertySource("classpath:influx/application-dev.properties")
 public class InfluxConfigSource {
     @Value("${bsm.influx.host.source}")
     private String influxDBHost;
