@@ -13,15 +13,15 @@ import org.springframework.context.annotation.PropertySource;
  */
 
 @Configuration
-@PropertySource("classpath:influx/application-dev.properties")
+//@PropertySource("classpath:influx/application-dev.properties")
 public class InfluxConfigSource {
-    @Value("${bsm.influx.host.source}")
+    @Value("${bsm.influx.host}")
     private String influxDBHost;
 
-    @Value("${bsm.influx.port.source}")
+    @Value("${bsm.influx.port}")
     private String influxDBPort;
 
-    @Value("${bsm.influx.token.source}")
+    @Value("${bsm.influx.token}")
     private String readToken;
 
     @Bean

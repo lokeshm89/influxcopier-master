@@ -4,14 +4,18 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import javax.annotation.Nullable;
 import java.util.Map;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class EntityAdapter {
-public final RosePointDataRepository rosePointDataRepository;
+    public final RosePointDataRepository rosePointDataRepository;
 
+    private final ConfigurationMap configurationMap;
+
+    @Nullable
     public TelemetryData getTelemetryData(Map<String, Object> values) {
 
         values.remove("result");
@@ -20,20 +24,27 @@ public final RosePointDataRepository rosePointDataRepository;
         values.remove("_stop");
         values.remove("_field");
         values.put("time", values.get("_time"));
-        values.put("assetId", values.get("asset"));
+        values.put("assetId", configurationMap.getAssets().get(values.get("asset")));
         values.remove("_time");
         values.remove("asset");
 
 
         TelemetryData data = new TelemetryData();
 
-        for (String key : values.keySet()) {
-            boolean success = data.setProperty(key.replace('-','_').trim(), values.get(key));
-            if (!success)
-                log.error("Unable to find matching postgres column for influx property=" + key.replace('-','_').trim());
+        try {
+
+            for (String key : values.keySet()) {
+                boolean success = data.setProperty(key.replace('-', '_').trim(), values.get(key));
+//                if (!success)
+//                    log.error("Missing influx property=" + key.replace('-', '_').trim());
+            }
+            return data;
+        } catch (Exception e) {
+            log.error(e.getMessage() + "asset=" + values.get("assetId") + "time=" + values.get("time"));
         }
-        return data;
+        return null;
     }
+
     public RosePointData getRosePointData(Map<String, Object> values) {
         values.remove("result");
         values.remove("table");
@@ -41,7 +52,7 @@ public final RosePointDataRepository rosePointDataRepository;
         values.remove("_stop");
         values.remove("_field");
         values.put("time", values.get("_time"));
-        values.put("assetId", values.get("asset"));
+        values.put("assetId", configurationMap.getAssets().get(values.get("asset")));
 //        values.put("airTemperature",values.get("air-temperature"));
 //        values.put("apparentWindSpeed",values.get("apparent-wind-speed"));
 //        values.put("headingTrue",values.get("heading-true"));
@@ -65,17 +76,17 @@ public final RosePointDataRepository rosePointDataRepository;
 
         RosePointData data = new RosePointData();
 
-        for (String key : values.keySet()) {
-            String propertyName = key.replace('-', '_').trim();
-//            log.info("Mapping InfluxDB property: " + key.replace('-', '_').trim() + " to entity property: " + propertyName);
-//            log.info("Value from InfluxDB: " + values.get(key));
+        try {
 
-            boolean success = data.setProperty(propertyName, values.get(key));
-            if (!success)
-                log.error("Unable to find matching postgres column for influx property=" + key.replace('-','_').trim());
+            for (String key : values.keySet()) {
+                boolean success = data.setProperty(key.replace('-', '_').trim(), values.get(key));
+//                if (!success)
+//                    log.error("Missing influx property=" + key.replace('-', '_').trim());
+            }
+            return data;
+        } catch (Exception e) {
+            log.error(e.getMessage() + "asset=" + values.get("assetId") + "time=" + values.get("time"));
         }
-        rosePointDataRepository.save(data);
-
-        return data;
+        return null;
     }
 }

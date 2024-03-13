@@ -11,7 +11,7 @@ import java.time.Instant;
 @Entity
 @Getter
 @Setter
-@Table(name = "iot_values_plc_2023")
+@Table(name = "iot_values_plc_2024")
 @DynamicUpdate
 public class TelemetryData {
     @Id

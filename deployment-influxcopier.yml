@@ -1,27 +1,83 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: influxcopier-deployment
-  labels:
-    app: influxcopier
-spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      app: influxcopier
-  template:
+apiVersion: v1
+kind: List
+items:
+  - apiVersion: apps/v1
+    kind: Deployment
     metadata:
+      name: influx-sql-rp-backup-jan24
       labels:
-        app: influxcopier
+        app.kubernetes.io/name: influx-sql-rp-backup-jan24
+        app.kubernetes.io/instance: influx-sql-rp-backup-jan24
+        app.kubernetes.io/version: "4.0.0"
+        app.kubernetes.io/component: server
+        app.kubernetes.io/part-of: "Boat-System-Monitoring"
+        app.kubernetes.io/managed-by: "lvenkatesan"
     spec:
-      containers:
-        - name: influxcopier
-          image: registry4cbc.azurecr.io/influxcopier:2.0
-          imagePullPolicy: Always
-          env :
-            - name : profile
-              value : prod
-          ports:
-            - containerPort: 80
-
-
+      replicas: 1
+      selector:
+        matchLabels:
+          app.kubernetes.io/name: influx-sql-rp-backup-jan24
+          app: influx-sql-rp-backup-jan24
+      template:
+        metadata:
+          labels:
+            app: influx-sql-rp-backup-jan24
+            app.kubernetes.io/name: influx-sql-rp-backup-jan24
+            app.kubernetes.io/instance: influx-sql-rp-backup-jan24
+            app.kubernetes.io/version: "4.0.0"
+            app.kubernetes.io/component: application
+            app.kubernetes.io/part-of: "Boat-System-Monitoring"
+            app.kubernetes.io/managed-by: "lvenkatesan"
+            cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+        spec:
+          containers:
+            - name: influx-sql-rp-backup-jan24
+              image: registry4cbc.azurecr.io/influx-sql-rp-backup-jan24:LATEST
+              imagePullPolicy: Always
+              resources:
+                requests:
+                  memory: "512Mi"
+                limits:
+                  memory: "1024Mi"
+              env:
+                - name: PROFILE
+                  value: prod
+                - name: START_TIME
+                  value: 2024-01-01T00:01:00Z
+                - name: STOP_TIME
+                  value: 2024-01-31T23:55:00Z
+                - name: LOG_LEVEL
+                  value: INFO
+                - name: PG_USERNAME
+                  value: backup-prod
+                - name: BUCKET_NAME
+                  value: rosepoint-data
+                - name: PG_PASSWORD
+                  value: 7Dr0F355L83XEb5
+                - name: PG_URL
+                  value: jdbc:postgresql://postgres-baclup-postgresql:5432/telemetry-backup-prod
+                - name : INFLUX_ORG
+                  value : "CBC Org"
+                - name: TELEMETRY_BUCKET
+                  value: telemetry-data
+                - name: ROSEPOINT_BUCKET
+                  value: rosepoint-data
+                - name : INFLUX_PORT
+                  value : "8086"
+                - name : INFLUX_HOST
+                  valueFrom :
+                    configMapKeyRef :
+                      key : INFLUX_HOST
+                      name : bsm-general-config
+                      optional : false
+                - name : INFLUX_TOKEN
+                  valueFrom :
+                    secretKeyRef :
+                      key : data-processor.influx.token
+                      name : server-passwords # This secret is created using the password  in BSM-MASTER-REFERENCE.xlsx.
+                      optional : false
+              ports:
+                - name: http
+                  containerPort: 80
+                  protocol: TCP
+          terminationGracePeriodSeconds: 15

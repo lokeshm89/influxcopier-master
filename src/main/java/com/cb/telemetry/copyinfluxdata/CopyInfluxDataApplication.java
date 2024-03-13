@@ -10,6 +10,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import java.util.HashMap;
+import java.util.stream.Collectors;
 
 @SpringBootApplication
 @RequiredArgsConstructor
@@ -23,31 +24,35 @@ public class CopyInfluxDataApplication {
     private final CopyRpDataService copyRpDataService;
 
     @Value("${bucket}")
-    private final String bucketToProcess;
+    private  String bucketToProcess;
 
     public static void main(String[] args) {
         SpringApplication.run(CopyInfluxDataApplication.class, args);
     }
 
     @EventListener(ApplicationReadyEvent.class)
-    public void startCopying() {
+    public void startCopying() throws InterruptedException {
 
         HashMap<String, String> assets = configurationMap.getAssets();
 
-        if (bucketToProcess.equals("telemetry-data")){
+        log.info("Total assets to process= " + assets.size());
 
-            for (String assetId : assets.keySet()) {
-                log.info("Beginning to process telemetry-data of asset="+ assetId);
-                //copyPlcDataService.copy(assetId, assets.get(assetId));
-                log.info("Completed processing telemetry-data of asset="+ assetId);
+        if (bucketToProcess.contains("telemetry")){
+
+            for (String assetId : assets.keySet().stream().sorted().collect(Collectors.toList())) {
+                log.info("Beginning to process telemetry data of asset="+ assetId);
+                copyPlcDataService.copy(assetId, assets.get(assetId));
+                log.info("Completed processing telemetry data of asset="+ assetId);
             }
         }
-        else if (bucketToProcess.equals("rosepoint-data")) {
+        else if (bucketToProcess.contains("rosepoint")) {
             for (String assetId : assets.keySet()) {
-                log.info("Beginning to process telemetry-data of asset="+ assetId);
+                log.info("Beginning to process rosepoint data of asset="+ assetId);
                 copyRpDataService.copy(assetId, assets.get(assetId));
-                log.info("Completed processing telemetry-data of asset="+ assetId);
+                log.info("Completed processing rosepoint data of asset="+ assetId);
             }
         }
+
+        log.info("Completed copying data of all given assets...");
     }
 }

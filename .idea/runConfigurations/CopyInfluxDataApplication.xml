@@ -1,0 +1,25 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="CopyInfluxDataApplication" type="SpringBootApplicationConfigurationType" factoryName="Spring Boot" nameIsGenerated="true">
+    <envs>
+      <env name="BUCKET_NAME" value="telemetry-test" />
+      <env name="INFLUX_HOST" value="localhost" />
+      <env name="INFLUX_ORG" value="CBC Org" />
+      <env name="INFLUX_PORT" value="8086" />
+      <env name="INFLUX_TOKEN" value="KbC4YCYDxEN1CNKP0f2vnmJGaZiXUHwii_7GW4Konz-YPOneAE8erlp0DErvFFGlUAHHUGbJscIYcKru2pbLjg==" />
+      <env name="PG_PASSWORD" value="Bf5UL278yveI4k3" />
+      <env name="PG_URL" value="jdbc:postgresql://localhost:35432/telemetry-backup-dev" />
+      <env name="PG_USERNAME" value="backup-dev" />
+      <env name="PROFILE" value="dev" />
+      <env name="ROSEPOINT_BUCKET" value="rosepoint-test" />
+      <env name="START_TIME" value="2015-07-01T23:55:00Z" />
+      <env name="STOP_TIME" value="2023-12-31T23:55:00Z" />
+      <env name="TELEMETRY_BUCKET" value="telemetry-test" />
+    </envs>
+    <option name="FRAME_DEACTIVATION_UPDATE_POLICY" value="UpdateClassesAndResources" />
+    <module name="CopyInfluxData" />
+    <option name="SPRING_BOOT_MAIN_CLASS" value="com.cb.telemetry.copyinfluxdata.CopyInfluxDataApplication" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

@@ -13,7 +13,7 @@ import java.time.Instant;
 @Getter
 @Setter
 @Slf4j
-@Table(name = "iot_values_rp_2023")
+@Table(name = "iot_values_rp_2024")
 @DynamicUpdate
 public class RosePointData {
     @Id
@@ -25,45 +25,47 @@ public class RosePointData {
     private Double air_temperature;
     private Double apparent_wind_angle;
     private Double apparent_wind_speed;
-   private Double barometric_pressure;
+    private Double barometric_pressure;
     private Double course_over_ground;
     private Double hdop;
     private Double heading_true;
     private Double lateral_speed_bow;
-   private Double lateral_speed_stern;
-   private Double longitudinal_speed;
-   private Double rate_of_turn;
+    private Double lateral_speed_stern;
+    private Double longitudinal_speed;
+    private Double rate_of_turn;
     private Boolean real_time;
     private Double river_mile;
-    private String river_code ;
+    private String river_code;
     private String position;
     private Double speed_over_ground;
     private Double vessel_airdraft;
     private Double vessel_draft;
     private Double vessel_beam;
     private Double vessel_length;
+    private Double depth;
+    private Double water_temperature;
 
 
-
-public boolean setProperty(String propertyName, Object value) {
+    public boolean setProperty(String propertyName, Object value) {
         try {
             Field field = getClass().getDeclaredField(propertyName.replace('-', '_').trim());
             field.setAccessible(true);
-            if(value == null)
+            if (value == null)
                 field.set(this, null);
-            else if(value.toString().equalsIgnoreCase("true"))
+            else if (value.toString().equalsIgnoreCase("true"))
                 field.set(this, Boolean.TRUE);
             else if (value.toString().equalsIgnoreCase("false"))
                 field.set(this, Boolean.FALSE);
             else
-            field.set(this, value);
-            return  true;
+                field.set(this, value);
+            return true;
         } catch (NoSuchFieldException e) {
-            log.error("Field not found: " + propertyName);
+            if (!propertyName.contains("_"))
+                log.debug("Field not found: " + propertyName);
         } catch (IllegalAccessException e) {
             log.error("Error setting field: " + propertyName, e);
         }
-            return false;
-        }
+        return false;
+    }
 
 }
