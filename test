@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: fruit-statefulset
+spec:
+  serviceName: "fruit-service"
+  replicas: 3
+  selector:
+    matchLabels:
+      app: fruit
+  template:
+    metadata:
+      labels:
+        app: fruit
+    spec:
+      securityContext:
+        runAsUser: 1000    # Set a non-root user (OpenShift requires this by default)
+        fsGroup: 2000      # Set a file system group to avoid permission issues
+      containers:
+      - name: fruit-container
+        image: your-container-image   # Replace with your actual image
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            FRUITS=("apple" "banana" "cherry")
+            INDEX=$(($(hostname | awk -F'-' '{print $NF}')))
+            echo "Processing fruit: ${FRUITS[$INDEX]}"
+        env:
+        - name: FRUIT_NAME
+          value: $(hostname)
+        securityContext:
+          allowPrivilegeEscalation: false    # Disable privilege escalation for extra security
+  volumeClaimTemplates: []
